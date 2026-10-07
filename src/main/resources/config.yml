@@ -1,0 +1,105 @@
+# Maximum length of a single voice note, in seconds (3-300)
+max-duration: 60
+# Shorter notes are discarded, in seconds
+min-duration: 1
+# Cooldown between sent notes, in seconds
+cooldown: 10
+# How long a note stays playable, in minutes
+expire-after: 30
+# Do not broadcast the player's live voice to others while they are recording
+mute-while-recording: true
+
+# Loudness drawn with characters, shown by the <wave> element
+waveform:
+  enabled: true
+  # Number of bars (4-80)
+  bars: 24
+  # From quietest to loudest, any number of characters. Other ideas: ".:|"  or  "·╷│┃"
+  chars: "▁▂▃▄▅▆▇█"
+  # Optional colors from quietest to loudest (#hex or names like aqua). Empty = use the element's color
+  colors: ["#2f5873", "#3f7fab", "#58a8dc", "#8fd2ff"]
+
+# How a voice note looks in chat.
+# Lines are MiniMessage templates built from the elements below: <sender>, <play>, <wave>...
+# plus <prefix> (messages.prefix). Add your own elements and use them by name.
+note-format:
+  global: "<prefix><sender><dark_gray>: </dark_gray><play> <wave> <duration>"
+  private: "<prefix><sender> <dark_gray>→</dark_gray> <gray>you</gray><dark_gray>: </dark_gray><play> <wave> <duration> <reply>"
+  private-sent: "<prefix><gray>you</gray> <dark_gray>→</dark_gray> <recipient><dark_gray>: </dark_gray><play> <wave> <duration>"
+  # Replaces [vn:id] tokens inside chat plugin messages (private.delivery: command)
+  token: "<play> <wave> <duration>"
+
+  # Every element has:
+  #   text  - MiniMessage; {sender} {recipient} {duration} {id} are filled in, <wave> inserts the waveform
+  #   hover - optional MiniMessage shown on mouse over
+  #   click - optional: play | reply | stop | run:/command | suggest:/command | url:https://... | copy:text
+  elements:
+    sender:
+      text: "<aqua>{sender}</aqua>"
+      hover: "<gray>Click to message <white>{sender}</white>"
+      click: "suggest:/msg {sender} "
+    recipient:
+      text: "<aqua>{recipient}</aqua>"
+    play:
+      text: "<white>▶</white>"
+      hover: "<gray>Play the voice note"
+      click: play
+    wave:
+      text: "<wave>"
+      hover: "<gray>Play the voice note"
+      click: play
+    duration:
+      text: "<gray>{duration}</gray>"
+    reply:
+      text: "<aqua>[🎤 Reply]</aqua>"
+      hover: "<gray>Record a voice reply"
+      click: reply
+    stop:
+      text: "<red>■</red>"
+      hover: "<gray>Stop playback"
+      click: stop
+
+private:
+  # How private notes (/vn to <player>, /vn reply) are delivered:
+  #   internal - VoiceNotes sends the note itself (note-format.private / private-sent)
+  #   command  - the note goes through your chat plugin's command (ChatControl, Chatty, Essentials...),
+  #              so /reply, spy, ignore and PM toggles all work. The command receives a short token
+  #              like [vn:abc123] which PacketEvents replaces with note-format.token.
+  #              Requires PacketEvents; without it VoiceNotes falls back to internal.
+  delivery: internal
+  # Run as the sender. {recipient} - player name, {note} - the token. No leading slash.
+  command: "msg {recipient} {note}"
+  # Used by /vn reply in command mode, so your chat plugin decides who the reply goes to
+  reply-command: "r {note}"
+  # Internal mode only: commands watched to know who a player is talking to, for /vn reply
+  track-commands: [msg, tell, w, m, t, pm, whisper, message]
+  track-reply-commands: [r, reply]
+
+# MiniMessage format: https://docs.advntr.dev/minimessage/format.html
+messages:
+  prefix: "<dark_gray>[<aqua>🎤</aqua>]</dark_gray> "
+  # <buttons> in the recording-started messages is replaced with this
+  record-buttons: "<click:run_command:'/vn send'><hover:show_text:'<green>Send the voice note'><green>[✔ Send]</green></hover></click> <click:run_command:'/vn cancel'><hover:show_text:'<red>Discard the recording'><red>[✖ Cancel]</red></hover></click>"
+  recording-started: "<red>● Recording</red> <gray>for chat</gray>  <buttons>"
+  recording-started-private: "<red>● Recording</red> <gray>for</gray> <white><recipient></white>  <buttons>"
+  recording-started-reply: "<red>● Recording a reply</red>  <buttons>"
+  recording-actionbar: "<red>● REC</red> <white><time></white><gray> / <max></gray> <dark_gray>- hold your voice chat key</dark_gray>"
+  recording-cancelled: "<gray>Recording discarded.</gray>"
+  too-short: "<red>The voice note is too short, nothing was sent.</red>"
+  already-recording: "<red>You are already recording.</red> <buttons>"
+  not-recording: "<red>You are not recording.</red>"
+  recipient-offline: "<red>The recipient went offline, the note was not sent.</red>"
+  no-reply-target: "<red>You have nobody to reply to.</red>"
+  cooldown: "<red>Wait <seconds>s before sending another voice note.</red>"
+  token-expired: "<dark_gray>[voice expired]</dark_gray>"
+  # Action bar while listening; <sender>, <duration>, <wave>
+  now-playing: "<aqua>▶</aqua> <white><sender></white> <wave> <gray><duration></gray>"
+  expired: "<red>This voice note is no longer available.</red>"
+  no-voicechat: "<red>You need Simple Voice Chat installed and connected (and not disabled).</red>"
+  voicechat-not-ready: "<red>Voice chat is not running yet.</red>"
+  player-not-found: "<red>Player not found.</red>"
+  cannot-send-self: "<red>You cannot send a voice note to yourself.</red>"
+  no-permission: "<red>You don't have permission.</red>"
+  players-only: "<red>Only players can use this.</red>"
+  playback-failed: "<red>Could not play the voice note.</red>"
+  reloaded: "<green>Config reloaded.</green>"

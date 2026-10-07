@@ -1,0 +1,30 @@
+name: VoiceNotes
+version: '${version}'
+main: io.github.w133y.voicenotes.VoiceNotesPlugin
+api-version: '26.1'
+folia-supported: true
+author: w1z4r_d
+website: https://github.com/w133y
+description: Voice messages in chat. Server-side only, players just need Simple Voice Chat.
+depend: [voicechat]
+softdepend: [packetevents]
+
+commands:
+  voicenote:
+    description: Record and send voice notes
+    aliases: [vn]
+    usage: /<command> [to <player>|reply|send|cancel]
+
+permissions:
+  voicenotes.send:
+    description: Send voice notes to global chat
+    default: true
+  voicenotes.send.private:
+    description: Send private voice notes to a player
+    default: true
+  voicenotes.bypass-cooldown:
+    description: Ignore the cooldown between voice notes
+    default: op
+  voicenotes.admin:
+    description: Reload the config
+    default: op
